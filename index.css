@@ -12,7 +12,11 @@ body {
 .ball {
   border-radius: 50%;
   box-shadow: 0 0 1px #000;
+  height: 50px;
+  left: 0;
   position: absolute;
+  top: 0;
+  width: 50px;
 }
 
 #ball-bounding-area {
@@ -25,12 +29,4 @@ body {
 
 #test-ball {
   background: linear-gradient(35deg, #F00, #0FF);
-  border-radius: 50%;
-  bottom: 0;
-  height: 50px;
-  left: 0;
-  margin: auto;
-  right: 0;
-  top: 0;
-  width: 50px;
 }
