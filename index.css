@@ -1,3 +1,10 @@
+/* Clear default styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .ball {
   border-radius: 50%;
 }
