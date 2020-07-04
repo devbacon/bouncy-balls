@@ -24,3 +24,19 @@ const complementaryColors = [
   [colorHex.green, colorHex.magenta],
   [colorHex.blue, colorHex.yellow]
 ];
+
+class Ball {
+  constructor() {
+    // Compute all randomized variables upon creation
+    const colorPairIndex = Math.floor(Math.random() * complementaryColors.length);
+    const colorPair = complementaryColors[colorPairIndex];
+    const primaryColor = colorPair[0];
+    const secondaryColor = colorPair[1];
+    const element = document.createElement('div');
+    element.style.background = `linear-gradient(35deg, ${primaryColor}, ${secondaryColor})`;
+    
+    this.primaryColor = primaryColor;
+    this.secondaryColor = secondaryColor;
+    this.element = element;
+  }
+}
