@@ -67,14 +67,13 @@ class Ball {
     this.right = null;
     this.bottom = null;
     this.left = startX;
-
-    /* Relation properties */
     this.crossQuadrantRangeTop = null;
     this.crossQuadrantRangeRight = null;
     this.crossQuadrantRangeBottom = null;
     this.crossQuadrantRangeLeft = null;
     this.nextWallCollision = null;
     this.nextWallCollisionCoords = null;
+    this.distanceToWall = null;
   }
 
   enterDOM(container) {
@@ -134,23 +133,25 @@ class Ball {
   /* Determine next wall collision */
   /* TODO: Factor in corners */
   findNextWallCollision() {
+    let collisionAngle = null;
+    let collisionTangentLength = null;
+
     const leftTop = this.direction > this.crossQuadrantRangeTop[0] && this.direction < 360;
     const rightTop = this.direction > 0 && this.direction < this.crossQuadrantRangeTop[1];
     
     /* Hit in top cross quadrant */
     if (leftTop || rightTop) {
       if (leftTop) {
-        const collisionAngle = 360 - this.crossQuadrantRangeTop[0];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
+        collisionAngle = 360 - this.crossQuadrantRangeTop[0];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
         this.nextWallCollisionCoords = [this.left - this.radius - collisionTangentLength, 0];
       }
       if (rightTop) {
-        const collisionAngle = this.crossQuadrantRangeTop[1];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
+        collisionAngle = this.crossQuadrantRangeTop[1];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
         this.nextWallCollisionCoords = [this.left - this.radius + collisionTangentLength, 0];
       }
       this.nextWallCollision = 'top';
-      console.log('hit top');
     }
 
     const topRight = this.direction > this.crossQuadrantRangeRight[0] && this.direction < 90;
@@ -159,17 +160,16 @@ class Ball {
     /* Hit in right cross quadrant */
     if (topRight || bottomRight) {
       if (topRight) {
-        const collisionAngle = 90 - this.crossQuadrantRangeRight[0];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
+        collisionAngle = 90 - this.crossQuadrantRangeRight[0];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
         this.nextWallCollisionCoords = [this.boundAreaWidth, this.top - this.radius - collisionTangentLength];
       }
       if (bottomRight) {
-        const collisionAngle = 90 + this.crossQuadrantRangeRight[1];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
+        collisionAngle = 90 + this.crossQuadrantRangeRight[1];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
         this.nextWallCollisionCoords = [this.boundAreaWidth, this.top - this.radius + collisionTangentLength];
       }
       this.nextWallCollision = 'right';
-      console.log('hit right');
     }
     
     const rightBottom = this.direction > this.crossQuadrantRangeBottom[0] && this.direction < 180;
@@ -178,17 +178,16 @@ class Ball {
     /* Hit in bottom cross quadrant */
     if (rightBottom || leftBottom) {
       if (rightBottom) {
-        const collisionAngle = 180 - this.crossQuadrantRangeBottom[0];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
+        collisionAngle = 180 - this.crossQuadrantRangeBottom[0];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
         this.nextWallCollisionCoords = [this.left - this.radius + collisionTangentLength, this.boundAreaHeight];
       }
       if (leftBottom) {
-        const collisionAngle = 180 + this.crossQuadrantRangeBottom[1];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
+        collisionAngle = 180 + this.crossQuadrantRangeBottom[1];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
         this.nextWallCollisionCoords = [this.left - this.radius - collisionTangentLength, this.boundAreaHeight];
       }
       this.nextWallCollision = 'bottom';
-      console.log('hit bottom');
     }
 
     const bottomLeft = this.direction > this.crossQuadrantRangeLeft[0] && this.direction < 270;
@@ -197,43 +196,19 @@ class Ball {
     /* Hit in left cross quadrant */
     if (bottomLeft || topLeft) {
       if (bottomLeft) {
-        const collisionAngle = 270 - this.crossQuadrantRangeLeft[0];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
+        collisionAngle = 270 - this.crossQuadrantRangeLeft[0];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
         this.nextWallCollisionCoords = [this.top - this.radius + collisionTangentLength, 0];
       }
       if (topLeft) {
-        const collisionAngle = 270 + this.crossQuadrantRangeLeft[1];
-        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
+        collisionAngle = 270 + this.crossQuadrantRangeLeft[1];
+        collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
         this.nextWallCollisionCoords = [this.top - this.radius - collisionTangentLength, 0];
       }
       this.nextWallCollision = 'left';
-      console.log('hit left');
     }
-  }
 
-  /* Use next wall collision to calculate ending coords */
-  findTransitionEndCoords() {
-    switch (this.nextWallCollision) {
-      case 'top':
-        /* if (this.direction < 0) {
-          
-        } else {
-
-        } */
-        break;
-      case 'right':
-        
-        break;
-      case 'bottom':
-        
-        break;
-      case 'left':
-        
-        break;
-      default:
-        return null;
-        break;
-    }
+    this.distanceToWall = MathUtils.calcHypotenuseBySides(this[this.nextWallCollision], collisionTangentLength);
   }
 
   /* Travel along path based on direction and velocity */
@@ -249,27 +224,11 @@ class Ball {
     */
 
     this.updateAllProps();
-    this.element.style.transitionOrigin = nextWallCollision;
-
-    /* Determine distance to wall, travel time, and landing coordinates */
-    switch (nextWallCollision) {
-      case 'top':
-        
-        break;
-      case 'right':
-
-        break;
-      case 'bottom':
-
-        break;
-      case 'left':
-
-        break;
-      default:
-        break;
-    }
-    
     this.element.style.transitionDuration = distanceToWall / this.speed;
+
+
+
+    // this.element.style.transitionOrigin = nextWallCollision;
   }
 
   findTransitionEnd(angle, wall) {
