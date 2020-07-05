@@ -25,6 +25,18 @@ const complementaryColors = [
   [colorHex.blue, colorHex.yellow]
 ];
 
+const boxAngles = {
+  topStart: 0,
+  topRight: 45,
+  right: 90,
+  bottomRight: 135,
+  bottom: 180,
+  bottomLeft: 225,
+  left: 270,
+  topLeft: 315,
+  topEnd: 360
+};
+
 class Ball {
   constructor() {
     // Compute all randomized variables upon creation
