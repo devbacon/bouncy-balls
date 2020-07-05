@@ -94,3 +94,12 @@ class Ball {
     return 'error';
   }
 }
+
+/* Set click listener bounding area to spawn in bouncy */
+const boundAreaEl = document.querySelector('#ball-bounding-area');
+boundAreaEl.addEventListener('click', spawnBall);
+
+function spawnBall() {
+  const ball = new Ball(boundAreaEl, 0, 0, 150, 10);
+  boundAreaEl.appendChild(ball.element);
+}
