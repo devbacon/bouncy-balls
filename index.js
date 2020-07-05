@@ -89,7 +89,6 @@ class Ball {
   updateAllProps() {
     this.updateBoundProps();
     this.updateBallProps();
-    this.updateRelationProps();
   }
 
   updateBoundProps() {
@@ -110,46 +109,32 @@ class Ball {
     this.offsetRight = this.boundAreaWidth - this.offsetLeft;
     this.offsetBottom = this.boundAreaHeight - this.offsetTop;
     this.offsetLeft = this.element.offsetLeft;
-  }
-
-  updateRelationProps() {
-    this.crossQuadrantRangeTop = this.findCrossQuadrentRange('top');
-    this.crossQuadrantRangeRight = this.findCrossQuadrentRange('right');
-    this.crossQuadrantRangeBottom = this.findCrossQuadrentRange('bottom');
-    this.crossQuadrantRangeLeft = this.findCrossQuadrentRange('left');
+    this.updateCrossQuadrentRanges();
     this.nextWallCollision = this.findNextWallCollision();
   }
 
-  /* Cross quadrants connect the */
-  findCrossQuadrentRange(wall) {
-    switch (wall) {
-      case 'top':
-        this.crossQuadrantRangeTop = [
-          MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetTop),
-          MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetTop)
-        ];
-        break;
-      case 'right':
-        this.crossQuadrantRangeRight = [
-          MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetRight),
-          MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetRight)
-        ];
-        break;
-      case 'bottom':
-        this.crossQuadrantRangeBottom = [
-          MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetBottom),
-          MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetBottom)
-        ];
-        break;
-      case 'left':
-        this.crossQuadrantRangeLeft = [
-          MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetLeft),
-          MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetLeft)
-        ];
-        break;
-      default:
-        break;
-    }
+  /* 
+    Cross quadrants are angle ranges used to check which wall the ball will land on
+    Imagine lines expanding from the ball to the boundary corners
+    Range values are converted to a 360 deg angle system to match with this.direction
+  */
+  updateCrossQuadrentRanges(wall) {
+    this.crossQuadrantRangeTop = [
+      360 - MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetTop),
+      MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetTop)
+    ];
+    this.crossQuadrantRangeRight = [
+      90 - MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetRight),
+      90 + MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetRight)
+    ];
+    this.crossQuadrantRangeBottom = [
+      180 - MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetBottom),
+      180 + MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetBottom)
+    ];
+    this.crossQuadrantRangeLeft = [
+      270 - MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetLeft),
+      270 + MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetLeft)
+    ];
   }
 
   /* Determine next wall collision */
