@@ -1,8 +1,10 @@
-/* Custom math utility short cuts exported as MathUtils object */
+/* Custom math utility short cuts */
+const MathUtils = {
+  calcHypotenuseBySides(length1, length2) {
+    return Math.sqrt(Math.pow(length1, 2) + Math.pow(length2, 2));
+  },
 
-export default MathUtils = {
-  /* Determine trigonometry operation based on missing side */
-  findRightTriangleOppositeLength(angle, adjacentLength, hypotenuseLength) {
+  calcRightTriangleOppositeLength(angle, adjacentLength, hypotenuseLength) {
     if (this.isValidTriangleAngle(angle)) return null;
 
     if (this.isValidTriangleLength(adjacentLength))
@@ -12,7 +14,7 @@ export default MathUtils = {
       return hypotenuseLength * Math.sin(angle);
   },
 
-  findRightTriangleAdjacentLength(angle, oppositeLength, hypotenuseLength) {
+  calcRightTriangleAdjacentLength(angle, oppositeLength, hypotenuseLength) {
     if (this.isValidTriangleAngle(angle)) return null;
 
     if (this.isValidTriangleLength(oppositeLength))
@@ -22,7 +24,7 @@ export default MathUtils = {
       return hypotenuseLength * Math.cos(angle);
   },
 
-  findRightTriangleHypotenuseLength(angle, oppositeLength, adjacentLength) {
+  calcRightTriangleHypotenuseLength(angle, oppositeLength, adjacentLength) {
     if (this.isValidTriangleAngle(angle)) return null;
 
     if (this.isValidTriangleLength(oppositeLength))
@@ -30,6 +32,15 @@ export default MathUtils = {
 
     if (this.isValidTriangleLength(adjacentLength))
       return adjacentLength / Math.cos(angle);
+  },
+
+  calcTangentAngle(oppositeLength, adjacentLength) {
+    if (this.isValidTriangleLength(oppositeLength) && this.isValidTriangleLength(adjacentLength))
+      return this.radiansToDegrees(Math.atan(oppositeLength / adjacentLength));
+  },
+
+  calcDoubleTangentAngle(oppositeLength1, oppositeLength2, adjacentLength) {
+    return this.calcTangentAngle(oppositeLength1, adjacentLength) + this.calcTangentAngle(oppositeLength2, adjacentLength);
   },
   
   getRightTriangleDimensions(angle1, sideLength1, angle2, sideLength2, angle3, sideLength3) {
@@ -48,5 +59,11 @@ export default MathUtils = {
     if (typeof number != 'number' || number < 1) return false;
     return true;
   },
-}
 
+  /* Conversions */
+  radiansToDegrees(radians) {
+    return radians * (180 / Math.PI);
+  },
+};
+
+export default MathUtils;
