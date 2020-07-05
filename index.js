@@ -74,12 +74,15 @@ class Ball {
     this.nextWallCollision = null;
     this.nextWallCollisionCoords = null;
     this.distanceToWall = null;
+    this.moveX = null;
+    this.moveY = null;
   }
 
   enterDOM(container) {
     this.boundAreaEl = container;
     container.appendChild(this.element);
     this.updateAllProps();
+    // this.startTransition();
     console.log(this);
   }
 
@@ -145,12 +148,17 @@ class Ball {
         collisionAngle = 360 - this.crossQuadrantRangeTop[0];
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
         this.nextWallCollisionCoords = [this.left - this.radius - collisionTangentLength, 0];
+        this.moveX = -collisionTangentLength + this.radius;
       }
+
       if (rightTop) {
         collisionAngle = this.crossQuadrantRangeTop[1];
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
         this.nextWallCollisionCoords = [this.left - this.radius + collisionTangentLength, 0];
+        this.moveX = collisionTangentLength - this.radius;
       }
+
+      this.moveY = -this.top + this.radius;
       this.nextWallCollision = 'top';
     }
 
@@ -163,12 +171,17 @@ class Ball {
         collisionAngle = 90 - this.crossQuadrantRangeRight[0];
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
         this.nextWallCollisionCoords = [this.boundAreaWidth, this.top - this.radius - collisionTangentLength];
+        this.moveY = -collisionTangentLength + this.radius;
       }
+
       if (bottomRight) {
         collisionAngle = 90 + this.crossQuadrantRangeRight[1];
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
         this.nextWallCollisionCoords = [this.boundAreaWidth, this.top - this.radius + collisionTangentLength];
+        this.moveY = collisionTangentLength - this.radius;
       }
+
+      this.moveX = this.right - this.radius;
       this.nextWallCollision = 'right';
     }
     
@@ -178,15 +191,20 @@ class Ball {
     /* Hit in bottom cross quadrant */
     if (rightBottom || leftBottom) {
       if (rightBottom) {
-        collisionAngle = 180 - this.crossQuadrantRangeBottom[0];
+        collisionAngle = 180 - this.direction;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
         this.nextWallCollisionCoords = [this.left - this.radius + collisionTangentLength, this.boundAreaHeight];
+        this.moveX = collisionTangentLength - this.radius;
       }
+
       if (leftBottom) {
-        collisionAngle = 180 + this.crossQuadrantRangeBottom[1];
+        collisionAngle = this.direction - 180;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
         this.nextWallCollisionCoords = [this.left - this.radius - collisionTangentLength, this.boundAreaHeight];
+        this.moveX = -collisionTangentLength + this.radius;
       }
+
+      this.moveY = this.bottom - this.radius;
       this.nextWallCollision = 'bottom';
     }
 
@@ -199,12 +217,17 @@ class Ball {
         collisionAngle = 270 - this.crossQuadrantRangeLeft[0];
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
         this.nextWallCollisionCoords = [this.top - this.radius + collisionTangentLength, 0];
+        this.moveX = -collisionTangentLength + this.radius;
       }
+
       if (topLeft) {
         collisionAngle = 270 + this.crossQuadrantRangeLeft[1];
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
         this.nextWallCollisionCoords = [this.top - this.radius - collisionTangentLength, 0];
+        this.moveX = collisionTangentLength - this.radius;
       }
+      
+      this.moveX = -this.left + this.radius;
       this.nextWallCollision = 'left';
     }
 
@@ -213,22 +236,10 @@ class Ball {
 
   /* Travel along path based on direction and velocity */
   startTransition() {
-    /* 
-      Steps:
-        1. Figure out which wall will be hit
-        2. Check the distance between ball edge and wall, factoring in direction
-          - Literal edge case: if ball is heading for a corner at a 45deg angle
-        3. Determine how long it will take to reach wall using distance and speed
-        4. Set CSS transition based on gathered parameters
-          - Set transition-origin to the wall edge direction
-    */
-
     this.updateAllProps();
-    this.element.style.transitionDuration = distanceToWall / this.speed;
+    this.element.style.transitionDuration = this.distanceToWall / this.speed;
+    this.element.style.transform = `translate(${this.moveX}px, ${this.moveY}px)`;
 
-
-
-    // this.element.style.transitionOrigin = nextWallCollision;
   }
 
   findTransitionEnd(angle, wall) {

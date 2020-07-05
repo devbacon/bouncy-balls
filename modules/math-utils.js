@@ -5,33 +5,45 @@ const MathUtils = {
   },
 
   calcRightTriangleOppositeLength(angle, adjacentLength, hypotenuseLength) {
-    if (this.isValidTriangleAngle(angle)) return null;
+    if (this.isValidTriangleAngle(angle)) {
+      const radians = this.degreesToRadians(angle);
 
-    if (this.isValidTriangleLength(adjacentLength))
-      return adjacentLength * Math.tan(angle);
+      if (this.isValidTriangleLength(adjacentLength))
+        return adjacentLength * Math.tan(radians);
+  
+      if (this.isValidTriangleLength(hypotenuseLength))
+        return hypotenuseLength * Math.sin(radians);
+    }
 
-    if (this.isValidTriangleLength(hypotenuseLength))
-      return hypotenuseLength * Math.sin(angle);
+    return null;
   },
 
   calcRightTriangleAdjacentLength(angle, oppositeLength, hypotenuseLength) {
-    if (this.isValidTriangleAngle(angle)) return null;
+    if (!this.isValidTriangleAngle(angle)) {
+      const radians = this.degreesToRadians(angle);
 
-    if (this.isValidTriangleLength(oppositeLength))
-      return oppositeLength / Math.tan(angle);
+      if (this.isValidTriangleLength(oppositeLength))
+        return oppositeLength / Math.tan(radians);
+  
+      if (this.isValidTriangleLength(hypotenuseLength))
+        return hypotenuseLength * Math.cos(radians);
+    }
 
-    if (this.isValidTriangleLength(hypotenuseLength))
-      return hypotenuseLength * Math.cos(angle);
+    return null;
   },
 
   calcRightTriangleHypotenuseLength(angle, oppositeLength, adjacentLength) {
-    if (this.isValidTriangleAngle(angle)) return null;
+    if (!this.isValidTriangleAngle(angle)) {
+      const radians = this.degreesToRadians(angle);
 
-    if (this.isValidTriangleLength(oppositeLength))
-      return oppositeLength / Math.sin(angle);
+      if (this.isValidTriangleLength(oppositeLength))
+        return oppositeLength / Math.sin(radians);
+  
+      if (this.isValidTriangleLength(adjacentLength))
+        return adjacentLength / Math.cos(radians);
+    }
 
-    if (this.isValidTriangleLength(adjacentLength))
-      return adjacentLength / Math.cos(angle);
+    return null;
   },
 
   calcTangentAngle(oppositeLength, adjacentLength) {
@@ -51,7 +63,7 @@ const MathUtils = {
 
   /* Validation */
   isValidTriangleAngle(angle) {
-    if (typeof angle != 'number' || (angle < 0 && angle > 180)) return false;
+    if (typeof angle != 'number' || angle < 0 || angle > 180) return false;
     return true;
   },
 
@@ -64,6 +76,10 @@ const MathUtils = {
   radiansToDegrees(radians) {
     return radians * (180 / Math.PI);
   },
+
+  degreesToRadians(degrees) {
+    return degrees * Math.PI / 180
+  }
 };
 
 export default MathUtils;
