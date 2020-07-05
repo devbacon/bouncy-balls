@@ -63,14 +63,10 @@ class Ball {
     this.direction = direction;
     this.speed = speed;
     /* Coordinate plane starts at top left of bound area */
-    this.offsetTop = startY;
-    this.offsetRight = null;
-    this.offsetBottom = null;
-    this.offsetLeft = startX;
-    /* this.spaceTop = null;
-    this.spaceRight = null;
-    this.spaceBottom = null;
-    this.spaceLeft = null; */
+    this.top = startY;
+    this.right = null;
+    this.bottom = null;
+    this.left = startX;
 
     /* Relation properties */
     this.crossQuadrantRangeTop = null;
@@ -84,6 +80,7 @@ class Ball {
     this.boundAreaEl = container;
     container.appendChild(this.element);
     this.updateAllProps();
+    console.log(this);
   }
 
   updateAllProps() {
@@ -93,22 +90,18 @@ class Ball {
 
   updateBoundProps() {
     this.boundAreaStyles = window.getComputedStyle(this.boundAreaEl);
-    this.boundAreaHeight = this.boundAreaStyles.getPropertyValue('height');
-    this.boundAreaWidth = this.boundAreaStyles.getPropertyValue('width');
+    this.boundAreaHeight = this.boundAreaEl.offsetHeight;
+    this.boundAreaWidth = this.boundAreaEl.offsetWidth;
   }
 
   updateBallProps() {
     this.styles = window.getComputedStyle(this.element);
-    this.circumference = this.styles.getPropertyValue('width');
+    this.circumference = this.element.offsetWidth;
     this.radius = this.circumference / 2;
-    /* this.spaceTop = this.offsetTop - this.radius;
-    this.spaceRight = this.boundAreaWidth - this.offsetLeft - this.radius;
-    this.spaceBottom = this.boundAreaHeight - this.offsetTop - this.radius;
-    this.spaceLeft = this.offsetLeft - this.radius; */
-    this.offsetTop = this.element.offsetTop;
-    this.offsetRight = this.boundAreaWidth - this.offsetLeft;
-    this.offsetBottom = this.boundAreaHeight - this.offsetTop;
-    this.offsetLeft = this.element.offsetLeft;
+    this.top = this.element.offsetTop + this.radius;
+    this.left = this.element.offsetLeft + this.radius;
+    this.right = this.boundAreaWidth - this.left;
+    this.bottom = this.boundAreaHeight - this.top;
     this.updateCrossQuadrentRanges();
     this.nextWallCollision = this.findNextWallCollision();
   }
@@ -118,22 +111,22 @@ class Ball {
     Imagine lines expanding from the ball to the boundary corners
     Range values are converted to a 360 deg angle system to match with this.direction
   */
-  updateCrossQuadrentRanges(wall) {
+  updateCrossQuadrentRanges() {
     this.crossQuadrantRangeTop = [
-      360 - MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetTop),
-      MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetTop)
+      360 - MathUtils.calcTangentAngle(this.left, this.top),
+      MathUtils.calcTangentAngle(this.right, this.top)
     ];
     this.crossQuadrantRangeRight = [
-      90 - MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetRight),
-      90 + MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetRight)
+      90 - MathUtils.calcTangentAngle(this.top, this.right),
+      90 + MathUtils.calcTangentAngle(this.bottom, this.right)
     ];
     this.crossQuadrantRangeBottom = [
-      180 - MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetBottom),
-      180 + MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetBottom)
+      180 - MathUtils.calcTangentAngle(this.right, this.bottom),
+      180 + MathUtils.calcTangentAngle(this.left, this.bottom)
     ];
     this.crossQuadrantRangeLeft = [
-      270 - MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetLeft),
-      270 + MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetLeft)
+      270 - MathUtils.calcTangentAngle(this.bottom, this.left),
+      270 + MathUtils.calcTangentAngle(this.top, this.left)
     ];
   }
 
