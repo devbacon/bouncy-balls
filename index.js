@@ -1,3 +1,6 @@
+/* Take care with the order of arguments in MathUtils methods */
+import MathUtils from './modules/math-utils.js';
+
 /* 
   Development Notes:
     - Consider front loading some of the computation on page load
@@ -20,7 +23,7 @@ const complementaryColors = [
   [colorHex.blue, colorHex.yellow]
 ];
 
-const boxAngles = {
+const relativeAngleReferences = {
   topStart: 0,
   topRight: 45,
   right: 90,
@@ -46,11 +49,13 @@ class Ball {
     element.style.background = `linear-gradient(35deg, ${this.primaryColor}, ${this.secondaryColor})`;
     element.classList.add('ball');
     
-    /* Dynamic properties */
+    /* Bound properties */
     this.boundAreaEl = null;
     this.boundAreaStyles = null;
     this.boundAreaHeight = null;
     this.boundAreaWidth = null;
+
+    /* Ball properties */
     this.element = element;
     this.styles = null;
     this.circumference = null;
@@ -58,51 +63,98 @@ class Ball {
     this.direction = direction;
     this.speed = speed;
     /* Coordinate plane starts at top left of bound area */
-    this.x = startX;
-    this.y = startY;
-    this.spaceTop = null;
+    this.offsetTop = startY;
+    this.offsetRight = null;
+    this.offsetBottom = null;
+    this.offsetLeft = startX;
+    /* this.spaceTop = null;
     this.spaceRight = null;
     this.spaceBottom = null;
-    this.spaceLeft = null;
+    this.spaceLeft = null; */
+
+    /* Relation properties */
+    this.crossQuadrantRangeTop = null;
+    this.crossQuadrantRangeRight = null;
+    this.crossQuadrantRangeBottom = null;
+    this.crossQuadrantRangeLeft = null;
     this.nextWallCollision = null;
   }
 
   enterDOM(container) {
     this.boundAreaEl = container;
     container.appendChild(this.element);
-    this.updatePropData();
+    this.updateAllProps();
   }
 
-  updatePropData() {
+  updateAllProps() {
+    this.updateBoundProps();
+    this.updateBallProps();
+    this.updateRelationProps();
+  }
+
+  updateBoundProps() {
     this.boundAreaStyles = window.getComputedStyle(this.boundAreaEl);
     this.boundAreaHeight = this.boundAreaStyles.getPropertyValue('height');
     this.boundAreaWidth = this.boundAreaStyles.getPropertyValue('width');
+  }
+
+  updateBallProps() {
     this.styles = window.getComputedStyle(this.element);
     this.circumference = this.styles.getPropertyValue('width');
     this.radius = this.circumference / 2;
-    this.x = this.element.offsetLeft;
-    this.y = this.element.offsetTop;
-    this.spaceTop = this.y - this.radius;
-    this.spaceRight = this.boundAreaWidth - this.x - this.radius;
-    this.spaceBottom = this.boundAreaHeight - this.y - this.radius;
-    this.spaceLeft = this.x - this.radius;
+    /* this.spaceTop = this.offsetTop - this.radius;
+    this.spaceRight = this.boundAreaWidth - this.offsetLeft - this.radius;
+    this.spaceBottom = this.boundAreaHeight - this.offsetTop - this.radius;
+    this.spaceLeft = this.offsetLeft - this.radius; */
+    this.offsetTop = this.element.offsetTop;
+    this.offsetRight = this.boundAreaWidth - this.offsetLeft;
+    this.offsetBottom = this.boundAreaHeight - this.offsetTop;
+    this.offsetLeft = this.element.offsetLeft;
+  }
+
+  updateRelationProps() {
+    this.crossQuadrantRangeTop = this.findCrossQuadrentRange('top');
+    this.crossQuadrantRangeRight = this.findCrossQuadrentRange('right');
+    this.crossQuadrantRangeBottom = this.findCrossQuadrentRange('bottom');
+    this.crossQuadrantRangeLeft = this.findCrossQuadrentRange('left');
     this.nextWallCollision = this.findNextWallCollision();
   }
 
+  /* Cross quadrants connect the */
+  findCrossQuadrentRange(wall) {
+    switch (wall) {
+      case 'top':
+        this.crossQuadrantRangeTop = [
+          MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetTop),
+          MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetTop)
+        ];
+        break;
+      case 'right':
+        this.crossQuadrantRangeRight = [
+          MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetRight),
+          MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetRight)
+        ];
+        break;
+      case 'bottom':
+        this.crossQuadrantRangeBottom = [
+          MathUtils.calcDoubleTangentAngle(this.offsetLeft, this.offsetBottom),
+          MathUtils.calcDoubleTangentAngle(this.offsetRight, this.offsetBottom)
+        ];
+        break;
+      case 'left':
+        this.crossQuadrantRangeLeft = [
+          MathUtils.calcDoubleTangentAngle(this.offsetTop, this.offsetLeft),
+          MathUtils.calcDoubleTangentAngle(this.offsetBottom, this.offsetLeft)
+        ];
+        break;
+      default:
+        break;
+    }
+  }
+
+  /* Determine next wall collision */
   findNextWallCollision() {
-    if (boxAngles.topLeft < this.direction < boxAngles.topRight) {
-      return 'top';
-    }
-    if (boxAngles.topRight < this.direction < boxAngles.bottomRight) {
-      return 'right';
-    }
-    if (boxAngles.bottomRight < this.direction < boxAngles.bottomLeft) {
-      return 'bottom';
-    }
-    if (boxAngles.bottomLeft < this.direction < boxAngles.topLeft) {
-      return 'left';
-    }
-    return 'error';
+    
   }
 
   /* Travel along path based on direction and velocity */
@@ -117,7 +169,7 @@ class Ball {
           - Set transition-origin to the wall edge direction
     */
 
-    this.updatePropData();
+    this.updateAllProps();
     this.element.style.transitionOrigin = nextWallCollision;
 
     /* Determine distance to wall, travel time, and landing coordinates */
@@ -141,11 +193,7 @@ class Ball {
     this.element.style.transitionDuration = distanceToWall / this.speed;
   }
 
-  findHypotenuseBySides(length1, length2) {
-    return Math.sqrt(Math.pow(length1, 2) + Math.pow(length2, 2));
-  }
-
-  findTransitionEndPosition(angle, wall) {
+  findTransitionEnd(angle, wall) {
     
   }
 
