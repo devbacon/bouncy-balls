@@ -51,7 +51,7 @@ const MathUtils = {
 
   /* Validation */
   isValidTriangleAngle(angle) {
-    if (typeof angle != 'number' || 0 > angle > 180) return false;
+    if (typeof angle != 'number' || (angle < 0 && angle > 180)) return false;
     return true;
   },
 

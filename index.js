@@ -103,7 +103,7 @@ class Ball {
     this.right = this.boundAreaWidth - this.left;
     this.bottom = this.boundAreaHeight - this.top;
     this.updateCrossQuadrentRanges();
-    this.nextWallCollision = this.findNextWallCollision();
+    this.findNextWallCollision();
   }
 
   /* 
@@ -131,8 +131,20 @@ class Ball {
   }
 
   /* Determine next wall collision */
+  /* TODO: Factor in corners */
   findNextWallCollision() {
-    
+    if (this.direction > this.crossQuadrantRangeTop[0] && this.direction < this.crossQuadrantRangeTop[1]) {
+      this.nextWallCollision = 'top';
+    }
+    if (this.direction > this.crossQuadrantRangeRight[0] && this.direction < this.crossQuadrantRangeRight[1]) {
+      this.nextWallCollision = 'right';
+    }
+    if (this.direction > this.crossQuadrantRangeBottom[0] && this.direction < this.crossQuadrantRangeBottom[1]) {
+      this.nextWallCollision = 'bottom';
+    }
+    if (this.direction > this.crossQuadrantRangeLeft[0] && this.direction < this.crossQuadrantRangeLeft[1]) {
+      this.nextWallCollision = 'left';
+    }
   }
 
   /* Travel along path based on direction and velocity */
