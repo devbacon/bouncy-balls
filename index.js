@@ -1,6 +1,7 @@
 /* 
   Development Notes:
-    - Consider front loading some of the computation on page load 
+    - Consider front loading some of the computation on page load
+    - Control CSS animations and transitions with JS
 
   TODOs:
     [] Create first ball drop
@@ -16,7 +17,7 @@ const colorHex = {
   green: '#0F0',
   magenta: '#F0F',
   blue: '#00F',
-  yellow: 'FF0'
+  yellow: '#FF0'
 };
 
 const complementaryColors = [
@@ -78,6 +79,15 @@ class Ball {
     this.y = this.element.offsetTop;
   }
 
+  enterDOM() {
+
+  }
+
+  /* Travel along path based on direction and velocity */
+  startTransition() {
+
+  }
+
   findNextWallCollision() {
     if (boxAngles.topLeft < this.direction < boxAngles.topRight) {
       return 'top';
@@ -92,6 +102,18 @@ class Ball {
       return 'left';
     }
     return 'error';
+  }
+
+  findHypotenuseBySides(length1, length2) {
+    return Math.sqrt(Math.pow(length1, 2) + Math.pow(length2, 2));
+  }
+
+  findTransitionEndPosition(angle, wall) {
+    
+  }
+
+  leaveDOM() {
+
   }
 }
 
