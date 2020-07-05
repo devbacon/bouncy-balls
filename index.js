@@ -85,7 +85,17 @@ class Ball {
 
   /* Travel along path based on direction and velocity */
   startTransition() {
+    /* 
+      Steps:
+        1. Figure out which wall will be hit
+        2. Check the distance between ball edge and wall, factoring in direction
+          - Literal edge case: if ball is heading for a corner at a 45deg angle
+        3. Determine how long it will take to reach wall using distance and speed
+        4. Set CSS transition based on gathered parameters
+          - Set transition-origin to the wall edge direction
+    */
 
+    
   }
 
   findNextWallCollision() {
