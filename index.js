@@ -77,4 +77,20 @@ class Ball {
     this.x = this.element.offsetLeft;
     this.y = this.element.offsetTop;
   }
+
+  findNextWallCollision() {
+    if (boxAngles.topLeft < this.direction < boxAngles.topRight) {
+      return 'top';
+    }
+    if (boxAngles.topRight < this.direction < boxAngles.bottomRight) {
+      return 'right';
+    }
+    if (boxAngles.bottomRight < this.direction < boxAngles.bottomLeft) {
+      return 'bottom';
+    }
+    if (boxAngles.bottomLeft < this.direction < boxAngles.topLeft) {
+      return 'left';
+    }
+    return 'error';
+  }
 }
