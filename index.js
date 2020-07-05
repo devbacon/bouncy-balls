@@ -74,6 +74,7 @@ class Ball {
     this.crossQuadrantRangeBottom = null;
     this.crossQuadrantRangeLeft = null;
     this.nextWallCollision = null;
+    this.nextWallCollisionCoords = null;
   }
 
   enterDOM(container) {
@@ -132,19 +133,102 @@ class Ball {
 
   /* Determine next wall collision */
   /* TODO: Factor in corners */
-  findNextWallCollision() {
-    if (this.direction > this.crossQuadrantRangeTop[0] && this.direction < this.crossQuadrantRangeTop[1]) {
+  findNextWallCollision() {  
+    const leftTop = this.direction > this.crossQuadrantRangeTop[0] && this.direction < 360;
+    const rightTop = this.direction > 0 && this.direction < this.crossQuadrantRangeTop[1];
+    
+    /* Hit in top cross quadrant */
+    if (leftTop || rightTop) {
+      if (leftTop) {
+        const collisionAngle = 360 - this.crossQuadrantRangeTop[0];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
+        this.nextWallCollisionCoords = [this.left - collisionTangentLength, 0];
+      }
+      if (rightTop) {
+        const collisionAngle = this.crossQuadrantRangeTop[1];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
+        this.nextWallCollisionCoords = [this.left + collisionTangentLength, 0];
+      }
       this.nextWallCollision = 'top';
     }
-    if (this.direction > this.crossQuadrantRangeRight[0] && this.direction < this.crossQuadrantRangeRight[1]) {
+
+    const topRight = this.direction > this.crossQuadrantRangeRight[0] && this.direction < 90;
+    const bottomRight = this.direction > 90 && this.direction < this.crossQuadrantRangeRight[1];
+    
+    /* Hit in right cross quadrant */
+    if (topRight || bottomRight) {
+      if (topRight) {
+        const collisionAngle = 90 - this.crossQuadrantRangeTop[0];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
+        this.nextWallCollisionCoords = [this.boundAreaWidth, this.top - collisionTangentLength];
+      }
+      if (bottomRight) {
+        const collisionAngle = 90 + this.crossQuadrantRangeTop[1];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
+        this.nextWallCollisionCoords = [this.boundAreaWidth, this.top + collisionTangentLength];
+      }
       this.nextWallCollision = 'right';
     }
-    if (this.direction > this.crossQuadrantRangeBottom[0] && this.direction < this.crossQuadrantRangeBottom[1]) {
+    
+    const rightBottom = this.direction > this.crossQuadrantRangeBottom[0] && this.direction < 180;
+    const leftBottom = this.direction > 180 && this.direction < this.crossQuadrantRangeBottom[1];
+    
+    /* Hit in bottom cross quadrant */
+    if (rightBottom || leftBottom) {
+      if (rightBottom) {
+        const collisionAngle = 180 - this.crossQuadrantRangeTop[0];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
+        this.nextWallCollisionCoords = [this.left + collisionTangentLength, this.boundAreaHeight];
+      }
+      if (leftBottom) {
+        const collisionAngle = 180 + this.crossQuadrantRangeTop[1];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
+        this.nextWallCollisionCoords = [this.left - collisionTangentLength, this.boundAreaHeight];
+      }
       this.nextWallCollision = 'bottom';
     }
-    if (this.direction > this.crossQuadrantRangeLeft[0] && this.direction < this.crossQuadrantRangeLeft[1]) {
+
+    const bottomLeft = this.direction > this.crossQuadrantRangeLeft[0] && this.direction < 270;
+    const bottomRight = this.direction > 270 && this.direction < this.crossQuadrantRangeLeft[1];
+
+    /* Hit in left cross quadrant */
+    if (bottomLeft || bottomRight) {
+      if (bottomLeft) {
+        const collisionAngle = 270 - this.crossQuadrantRangeTop[0];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
+        this.nextWallCollisionCoords = [this.top + collisionTangentLength, 0];
+      }
+      if (bottomRight) {
+        const collisionAngle = 270 + this.crossQuadrantRangeTop[1];
+        const collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
+        this.nextWallCollisionCoords = [this.top - collisionTangentLength, 0];
+      }
       this.nextWallCollision = 'left';
     }
+  }
+
+  /* Use next wall collision to calculate ending coords */
+  findTransitionEndCoords() {
+    switch (this.nextWallCollision) {
+      case 'top':
+        if (this.direction < 0) {
+          
+        } else {
+
+        }
+        break;
+      case 'right':
+        
+        break;
+      case 'bottom':
+        
+        break;
+      case 'left':
+        
+        break;
+      default:
+        return null;
+        break;
   }
 
   /* Travel along path based on direction and velocity */
