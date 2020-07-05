@@ -82,7 +82,7 @@ class Ball {
     this.boundAreaEl = container;
     container.appendChild(this.element);
     this.updateAllProps();
-    // this.startTransition();
+    this.startTransition();
     console.log(this);
   }
 
@@ -237,9 +237,9 @@ class Ball {
   /* Travel along path based on direction and velocity */
   startTransition() {
     this.updateAllProps();
-    this.element.style.transitionDuration = this.distanceToWall / this.speed;
+    this.element.style.transitionTimingFunction = 'linear';
+    this.element.style.transitionDuration = `${this.distanceToWall / this.speed}s`;
     this.element.style.transform = `translate(${this.moveX}px, ${this.moveY}px)`;
-
   }
 
   findTransitionEnd(angle, wall) {
@@ -257,6 +257,6 @@ const boundAreaEl = document.querySelector('#ball-bounding-area');
 boundAreaEl.addEventListener('click', addBall);
 
 function addBall() {
-  const ball = new Ball(0, 0, 150, 10);
+  const ball = new Ball(0, 0, 150, 400);
   ball.enterDOM(boundAreaEl);
 }
