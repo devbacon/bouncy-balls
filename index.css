@@ -9,6 +9,14 @@ body {
   background: #888;
 }
 
+#ball-bounding-area {
+  background: #333;
+  height: 500px;
+  margin: 50px auto;
+  position: relative;
+  width: 500px;
+}
+
 .ball {
   border-radius: 50%;
   height: 50px;
@@ -16,14 +24,6 @@ body {
   position: absolute;
   top: 0;
   width: 50px;
-}
-
-#ball-bounding-area {
-  background: #333;
-  height: 500px;
-  margin: 50px auto;
-  position: relative;
-  width: 500px;
 }
 
 #test-ball {
