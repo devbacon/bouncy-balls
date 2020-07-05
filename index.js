@@ -66,4 +66,15 @@ class Ball {
     this.x = startX;
     this.y = startY;
   }
+
+  updatePropData() {
+    this.boundAreaStyles = window.getComputedStyle(this.boundAreaEl);
+    this.boundAreaHeight = this.boundAreaStyles.getPropertyValue('height');
+    this.boundAreaWidth = this.boundAreaStyles.getPropertyValue('width');
+    this.styles = window.getComputedStyle(this.element);
+    this.circumference = this.styles.getPropertyValue('width');
+    this.radius = this.circumference / 2;
+    this.x = this.element.offsetLeft;
+    this.y = this.element.offsetTop;
+  }
 }
