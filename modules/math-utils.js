@@ -1,5 +1,10 @@
 /* Custom math utility short cuts */
 const MathUtils = {
+  findRemainingTriangleAngle(angle1, angle2) {
+    if (angle1 + angle2 > 180) return null;
+    return 180 - angle1 - angle2;
+  },
+
   calcHypotenuseBySides(length1, length2) {
     return Math.sqrt(Math.pow(length1, 2) + Math.pow(length2, 2));
   },

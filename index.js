@@ -76,19 +76,22 @@ class Ball {
     this.distanceToWall = null;
     this.moveX = null;
     this.moveY = null;
+    this.nextMove = null;
+    this.bounceCount = 0;
   }
 
   enterDOM(container) {
     this.boundAreaEl = container;
     container.appendChild(this.element);
+    console.log('start state');
     this.updateAllProps();
-    this.startTransition();
-    console.log(this);
+    this.moveToWall();
   }
 
   updateAllProps() {
     this.updateBoundProps();
     this.updateBallProps();
+    console.log(this);
   }
 
   updateBoundProps() {
@@ -234,16 +237,124 @@ class Ball {
     this.distanceToWall = MathUtils.calcHypotenuseBySides(this[this.nextWallCollision], collisionTangentLength);
   }
 
-  /* Travel along path based on direction and velocity */
-  startTransition() {
-    this.updateAllProps();
+  moveToWall() {
     this.element.style.transitionTimingFunction = 'linear';
     this.element.style.transitionDuration = `${this.distanceToWall / this.speed}s`;
     this.element.style.transform = `translate(${this.moveX}px, ${this.moveY}px)`;
+    const msTravelTime = this.distanceToWall / this.speed * 1000;
+
+    if (msTravelTime > 100) {
+      this.nextMove = setTimeout(() => {
+        this.bounceDirection.bind(this);
+        this.bounceDirection();
+        this.testing();
+      }, this.distanceToWall / this.speed * 1000);
+    }
   }
 
-  findTransitionEnd(angle, wall) {
-    
+  testing() {
+    console.log('da fuq?');
+  }
+
+  bounceDirection() {
+    this.bounceCount++;
+    console.log('bounce ' + this.bounceCount);
+    let angle = null;
+    let angleOfAttack = null;
+
+    /* 
+      Get angle of attack and replicate for exit angle
+    */
+
+   switch (this.nextWallCollision) {
+    case 'top':
+      if (this.moveX > 0) {
+        angle = this.direction;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 180 + angleOfAttack;
+      } else {
+        angle = 360 - this.direction;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 270 - angleOfAttack;
+      }
+      break;
+    case 'right':
+      if (this.moveY > 0) {
+        angle = this.direction - 90;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 360 - angleOfAttack;
+      } else {
+        angle = 90 - this.direction;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 180 + angleOfAttack;
+      }
+      break;
+    case 'bottom':
+      if (this.moveX > 0) {
+        angle = 180 - this.direction;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 90 - angleOfAttack;
+      } else {
+        angle = this.direction - 180;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 270 + angleOfAttack;
+      }
+      break;
+    case 'left':
+      if (this.moveY > 0) {
+        angle = 270 - this.direction;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 0 + angleOfAttack;
+      } else {
+        angle = this.direction - 270;
+        angleOfAttack = MathUtils.findRemainingTriangleAngle(angle, 90);
+        this.direction = 180 + angleOfAttack;
+      }
+      break;
+    default:
+      break;
+
+    /* switch (this.nextWallCollision) {
+      case 'top':
+        if (this.moveX > 0) {
+          this.direction -= angle;
+        } else {
+          this.direction += angle;
+        }
+        break;
+      case 'right':
+        if (this.moveY > 0) {
+          this.direction += angle;
+        } else {
+          this.direction -= angle;
+        }
+        break;
+      case 'bottom':
+        if (this.moveX > 0) {
+          this.direction += angle + 180;
+          if (this.direct > 360) this.direction -= 360;
+        } else {
+          this.direction -= angle - 180;
+          if (this.direct > 270) ;
+        }
+        break;
+      case 'left':
+        if (this.moveY > 0) {
+          this.direction -= angle;
+        } else {
+          this.direction += angle;
+        }
+        break;
+      default:
+        break; */
+    }
+
+    this.updateAllProps();
+    this.moveToWall();
+  }
+
+  stopMoving() {
+
   }
 
   leaveDOM(event) {
@@ -257,6 +368,7 @@ const boundAreaEl = document.querySelector('#ball-bounding-area');
 boundAreaEl.addEventListener('click', addBall);
 
 function addBall() {
-  const ball = new Ball(0, 0, 150, 400);
+  const ball = new Ball(0, 0, 170, 400);
+  console.log('ball direction just after creation = ' + ball.direction);
   ball.enterDOM(boundAreaEl);
 }
