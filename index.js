@@ -248,20 +248,20 @@ class Ball {
       if (bottomLeft) {
         collisionAngle = 270 - this.direction;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
-        nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius + collisionTangentLength);
-        this.nextWallCollisionCoords = [nextWallCalcCoord, 0];
-        this.moveX = -collisionTangentLength + this.radius;
+        nextWallCalcCoord = MathUtils.limitDecimals(this.top + this.radius + collisionTangentLength);
+        this.nextWallCollisionCoords = [0, nextWallCalcCoord];
+        this.moveY = -collisionTangentLength + this.radius;
       }
 
       if (topLeft) {
         collisionAngle = this.direction - 270;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
-        nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius - collisionTangentLength);
-        this.nextWallCollisionCoords = [nextWallCalcCoord, 0];
-        this.moveX = collisionTangentLength - this.radius;
+        nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius + collisionTangentLength);
+        this.nextWallCollisionCoords = [0, nextWallCalcCoord];
+        this.moveY = collisionTangentLength - this.radius;
       }
       
-      this.moveX = -this.left + this.radius;
+      this.moveX = -this.left;
       this.nextWallCollision = 'left';
     }
 
@@ -272,7 +272,7 @@ class Ball {
       MathUtils.calcHypotenuseBySides(this[this.nextWallCollision], collisionTangentLength));
     this.timeToNextWall = MathUtils.limitDecimals(this.distanceToNextWall / this.speed);
     if (debug) console.log(`Next collision is ${this.nextWallCollision} wall 
-      at coordinates ${this.nextWallCollisionCoords}`);
+      at coordinates [${this.nextWallCollisionCoords}]`);
   }
 
   moveToWall() {
