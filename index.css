@@ -20,9 +20,9 @@ body {
 .ball {
   border-radius: 50%;
   height: 50px;
-  left: 0;
+  left: 50px;
   position: absolute;
-  top: 0;
+  top: 100px;
   width: 50px;
 }
 
