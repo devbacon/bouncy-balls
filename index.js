@@ -171,7 +171,7 @@ class Ball {
     /* Hit in top cross quadrant */
     if (leftTop || rightTop) {
       if (leftTop) {
-        collisionAngle = 360 - this.crossQuadrantRangeTop[0];
+        collisionAngle = 360 - this.direction;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.left - this.radius - collisionTangentLength);
         this.nextWallCollisionCoords = [nextWallCalcCoord, 0];
@@ -179,7 +179,7 @@ class Ball {
       }
 
       if (rightTop) {
-        collisionAngle = this.crossQuadrantRangeTop[1];
+        collisionAngle = this.direction;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.top, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.left - this.radius + collisionTangentLength);
         this.nextWallCollisionCoords = [nextWallCalcCoord, 0];
@@ -196,7 +196,7 @@ class Ball {
     /* Hit in right cross quadrant */
     if (topRight || bottomRight) {
       if (topRight) {
-        collisionAngle = 90 - this.crossQuadrantRangeRight[0];
+        collisionAngle = 90 - this.direction;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius - collisionTangentLength);
         this.nextWallCollisionCoords = [this.boundAreaWidth, nextWallCalcCoord];
@@ -204,7 +204,7 @@ class Ball {
       }
 
       if (bottomRight) {
-        collisionAngle = 90 + this.crossQuadrantRangeRight[1];
+        collisionAngle = this.direction - 90;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.right, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius + collisionTangentLength);
         this.nextWallCollisionCoords = [this.boundAreaWidth, nextWallCalcCoord];
@@ -246,7 +246,7 @@ class Ball {
     /* Hit in left cross quadrant */
     if (bottomLeft || topLeft) {
       if (bottomLeft) {
-        collisionAngle = 270 - this.crossQuadrantRangeLeft[0];
+        collisionAngle = 270 - this.direction;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius + collisionTangentLength);
         this.nextWallCollisionCoords = [nextWallCalcCoord, 0];
@@ -254,7 +254,7 @@ class Ball {
       }
 
       if (topLeft) {
-        collisionAngle = 270 + this.crossQuadrantRangeLeft[1];
+        collisionAngle = this.direction - 270;
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.left, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.top - this.radius - collisionTangentLength);
         this.nextWallCollisionCoords = [nextWallCalcCoord, 0];
@@ -287,14 +287,19 @@ class Ball {
     if (this.bounceCount < 10) {
       this.nextMove = setTimeout(() => {
         if (debug) console.log(`Arrived at ${this.nextWallCollision} wall`);
-        this.updateBallPosition();
         this.updateDirection();
+        this.updateBallPosition();
       }, msTravelTime);
     }
   }
 
   updateBallPosition() {
-    // this.top += this.moc
+    if (debug) console.log(`Ball styles before update are top:${this.element.style.top} left:${this.element.style.left}`);
+    // this.element.style.transitionDuration = `0s`;
+    this.element.style.top = this.top - this.radius + 'px';
+    this.element.style.left = this.left - this.radius + 'px';
+    // this.element.style.transform = `translate(0px, 0px)`;
+    if (debug) console.log(`Updating ball styles to top:${this.element.style.top} left:${this.element.style.left}`);
   }
 
   updateDirection() {
@@ -324,12 +329,12 @@ class Ball {
       if (this.moveY > 0) {
         adjacentAngle = this.direction - 90;
         opposingAngle = MathUtils.findRemainingTriangleAngle(adjacentAngle, 90);
-        this.direction = 360 - opposingAngle;
+        this.direction = 180 + opposingAngle;
       } else {
       /* Moving to the top */
-        adjacentAngle = 90 - this.direction;
+        adjacentAngle = this.direction;
         opposingAngle = MathUtils.findRemainingTriangleAngle(adjacentAngle, 90);
-        this.direction = 180 + opposingAngle;
+        this.direction = 360 + opposingAngle;
       }
       console.log('Adjacent angle: ' + adjacentAngle);
       console.log('Opposing angle: ' + opposingAngle);
@@ -362,7 +367,6 @@ class Ball {
         this.direction = 180 + opposingAngle;
       }
       console.log('Adjacent angle: ' + adjacentAngle);
-      console.log('Opposing angle: ' + angleOfAttack);
       break;
     default:
       break;
@@ -388,6 +392,6 @@ const boundAreaEl = document.querySelector('#ball-bounding-area');
 boundAreaEl.addEventListener('click', addBall);
 
 function addBall() {
-  const ball = new Ball(50, 50, 160, 400);
+  const ball = new Ball(50, 50, 300, 400);
   ball.enterDOM(boundAreaEl);
 }
