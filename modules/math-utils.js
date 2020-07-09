@@ -84,7 +84,11 @@ const MathUtils = {
 
   degreesToRadians(degrees) {
     return degrees * Math.PI / 180
-  }
+  },
+
+  limitDecimals(number) {
+    return Math.round((number + Number.EPSILON) * 100) / 100
+  },
 };
 
 export default MathUtils;
