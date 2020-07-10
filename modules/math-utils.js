@@ -77,6 +77,18 @@ const MathUtils = {
     return true;
   },
 
+  isWithinRange(number, range, inclusive) {
+    if (typeof number != 'number' || !Array.isArray(range) || range.length !== 2) return false;
+    const min = range[0];
+    const max = range[1];
+    if (min > max) return false;
+    
+    if (inclusive)
+      return number >= min && number <= max;
+    else
+      return number > min && number < max;
+  },
+
   /* Conversions */
   radiansToDegrees(radians) {
     return radians * (180 / Math.PI);
