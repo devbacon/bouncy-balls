@@ -98,8 +98,10 @@ const MathUtils = {
     return degrees * Math.PI / 180
   },
 
-  limitDecimals(number) {
-    return Math.round((number + Number.EPSILON) * 100) / 100
+  limitDecimals(number, decimals) {
+    if (typeof number != 'number' || typeof decimals != 'number') return false;
+    const limit = Math.pow(10, decimals);
+    return Math.round((number + Number.EPSILON) * limit) / limit;
   },
 };
 
