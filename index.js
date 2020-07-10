@@ -75,7 +75,7 @@ class Ball {
     this.bottom = null;
     this.left = startX;
     /* Use objects for semantics */
-    this.crossQuadrantTop = { start: 0 , end: 0 };
+    this.crossQuadrantTop = { start: 0, end: 0 };
     this.crossQuadrantRight = { start: 0, end: 0 };
     this.crossQuadrantBottom = { start: 0, end: 0 };
     this.crossQuadrantLeft = { start: 0, end: 0 };
@@ -91,7 +91,7 @@ class Ball {
     this.secondsToNextWall = 0;
     this.translate = { x: 0, y: 0 };
     this.nextMoveTimer = null;
-    this.bounceCount = 0;
+    this.moveCount = 0;
     this.generalDecimalLimit = 3;
 
     if (debug) console.log(`Created ball object at coordinates [${startX},${startY}] 
@@ -114,9 +114,9 @@ class Ball {
     if (debug) console.log(`Ball element entering DOM in containing element`, this.element, container);
     container.appendChild(this.element);
     this.boundAreaEl = container;
-    this.updateState();
+    /* this.updateState();
     this.checkStartCoords();
-    this.moveToWall();
+    this.moveToWall(); */
   }
 
   leaveDOM(event) {
@@ -126,7 +126,7 @@ class Ball {
 
   /* Make sure that start XY coordinates are in bounds */
   checkStartCoords() {
-    if (debug) console.log(`Ensuring that starting coordinated are in bounds`, this.element, container);
+    if (debug) console.log(`Ensuring that starting coordinated are in bounds`);
     const xInBounds = MathUtils.isWithinRange(this.startX, [this.boundAreaLeft, this.boundAreaRight]);
     const yInBounds = MathUtils.isWithinRange(this.startY, [this.boundAreaTop, this.boundAreaBottom]);
 
@@ -155,8 +155,8 @@ class Ball {
     this.left = this.boundingClientRect.left;
     this.right = this.boundAreaWidth - this.left;
     this.bottom = this.boundAreaHeight - this.top;
-    this.updateCrossQuadrantRanges();
-    this.updateDirection();
+    this.updateCrossQuadrants();
+    // this.updateDirection();
     this.updateBounceData();
     const stateSnapshot = JSON.parse(JSON.stringify(this));
     if (debug) console.log(`Properties update completed`, stateSnapshot, this.element);
@@ -199,7 +199,7 @@ class Ball {
 
   updateBounceData() {
     if (debug) console.log(`Finding next bounce coordinates`);
-    /* If ball will bounce left or right */
+    /* Bounce direction(left, right, flip) relative to the current direction */
     let relativeBounceDirection = null;
     let adjacentAngle = null;
     let opposingLength = null;
@@ -223,6 +223,7 @@ class Ball {
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.top);
         this.nextBounceCoordinates.x = this.left + opposingLength;
       } else { /* Moving straight up */
+        relativeBounceDirection = 'reverse';
         this.nextBounceCoordinates.x = this.left;
       }
     }
@@ -246,6 +247,7 @@ class Ball {
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.right);
         this.nextBounceCoordinates.y = this.top + opposingLength;
       } else { /* Moving straight right */
+        relativeBounceDirection = 'reverse';
         this.nextBounceCoordinates.y = this.top;
       }
     }
@@ -269,6 +271,7 @@ class Ball {
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.bottom);
         this.nextBounceCoordinates.x = this.left - opposingLength;
       } else { /* Moving straight down */
+        relativeBounceDirection = 'reverse';
         this.nextBounceCoordinates.x = this.left;
       }
     }
@@ -292,6 +295,7 @@ class Ball {
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.left);
         this.nextBounceCoordinates.y = this.top - opposingLength;
       } else { /* Moving straight left */
+        relativeBounceDirection = 'reverse';
         this.nextBounceCoordinates.y = this.top;
       }
     }
@@ -302,6 +306,8 @@ class Ball {
       this.directionAfterBounce = this.direction - opposingAngle;
     if (relativeBounceDirection === 'right')
       this.directionAfterBounce = this.direction + opposingAngle;
+    if (relativeBounceDirection === 'flip')
+      this.directionAfterBounce = this.direction + 180;
 
     // Ensure that the 360 deg angle system is maintained by wrapping values
     // If direction is over 360 then reduce it by 360
@@ -311,7 +317,7 @@ class Ball {
       this.directionAfterBounce += 360;
 
     /* TODO: Catch corners */
-    if (!adjacentAngle || !opposingLength)
+    if (relativeBounceDirection)
       if (debug) console.log(`Hit a corner!`);
 
     this.nextBounceCoordinates.x = MathUtils.limitDecimals(this.nextBounceCoordinates.x, this.generalDecimalLimit);
@@ -328,6 +334,7 @@ class Ball {
 
   moveToWall() {
     if (debug) console.log(`Starting move to ${this.nextBounceWall} wall`);
+    this.moveCount++;
     this.element.style.transitionTimingFunction = 'linear';
     this.element.style.transitionDuration = `${this.secondsToNextWall}s`;
     this.element.style.transform = `translate(${this.translate.x}px, ${this.translate.y}px)`;
@@ -337,7 +344,7 @@ class Ball {
     if (debug) console.log(`Setting up ball to hit coordinates [${this.nextBounceCoordinates}] 
       with left and top values [${this.translate.x},${this.translate.y}] in ${this.secondsToNextWall} seconds`);
 
-    if (this.bounceCount < 10) {
+    if (this.moveCount < 10) {
       this.nextMoveTimer = setTimeout(() => {
         if (debug) console.log(`Arrived at ${this.nextBounceWall} wall`);
         this.updateState();
