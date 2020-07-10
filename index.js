@@ -38,7 +38,7 @@ const relativeAngleReferences = {
 };
 
 class Ball {
-  constructor(startX, startY, direction, speed) {
+  constructor(startX, startY, size, direction, speed) {
     /* Randomize colors */
     const colorPairIndex = Math.floor(Math.random() * complementaryColors.length);
     const colorPair = complementaryColors[colorPairIndex];
@@ -49,8 +49,8 @@ class Ball {
     const element = document.createElement('div');
     element.addEventListener('click', this.leaveDOM.bind(this));
     element.style.background = `linear-gradient(35deg, ${this.primaryColor}, ${this.secondaryColor})`;
-    element.style.left = `${startX}px`;
-    element.style.top = `${startY}px`;
+    element.style.left = `${startX - size / 2}px`;
+    element.style.top = `${startY - size / 2}px`;
     element.classList.add('ball');
     
     /* Bound properties */
@@ -65,11 +65,13 @@ class Ball {
     /* Ball properties */
     this.element = element;
     this.computedStyles = {};
-    this.diameter = 0;
-    this.radius = 0;
+    this.diameter = size;
+    this.radius = size / 2;
     this.direction = direction;
     this.speed = speed;
     /* Coordinate plane starts at top left of bound area */
+    this.startX = startX;
+    this.startY = startY;
     this.top = startY;
     this.right = null;
     this.bottom = null;
@@ -98,9 +100,9 @@ class Ball {
       facing angle ${direction} with speed of ${speed}`, this);
   }
 
-  get boundingClientRect() {
+  /* get boundingClientRect() {
     return this.element.getBoundingClientRect();
-  }
+  } */
 
   get parseComputedTop() {
     return parseInt(this.computedStyles.top);
@@ -114,12 +116,15 @@ class Ball {
     if (debug) console.log(`Ball element entering DOM in containing element`, this.element, container);
     container.appendChild(this.element);
     this.boundAreaEl = container;
-    /* this.updateState();
+    this.updateState();
     this.checkStartCoords();
-    this.moveToWall(); */
+
+    if (this.boundAreaEl.contains(this.element))
+      this.moveToWall();
   }
 
   leaveDOM(event) {
+    if (debug) console.log(`Removing ball element from DOM`);
     if (event) event.stopPropagation();
     this.boundAreaEl.removeChild(this.element);
   }
@@ -130,32 +135,34 @@ class Ball {
     const xInBounds = MathUtils.isWithinRange(this.startX, [this.boundAreaLeft, this.boundAreaRight]);
     const yInBounds = MathUtils.isWithinRange(this.startY, [this.boundAreaTop, this.boundAreaBottom]);
 
-    if (!xInBounds || !yInBounds)
+    if (!xInBounds || !yInBounds) {
+      if (debug) console.log(`Starting coordinates [${this.startX},${this.startY}] are not 
+        within bounds [[${this.boundAreaLeft},${this.boundAreaRight}],[${this.boundAreaTop},${this.boundAreaBottom}]]`);
       this.leaveDOM();
-    else
-      if (debug) console.log(`Starting coordinate are indeed within bounds`);
+    } else {
+      if (debug) console.log(`Starting coordinates are indeed within bounds`);
+    }
   }
 
   updateState() {
     if (debug) console.log(`Updating all object properties`);
-    this.diameter = this.element.offsetWidth;
-    this.radius = this.diameter / 2;
+    /* this.diameter = this.element.offsetWidth;
+    this.radius = this.diameter / 2; */
     this.boundAreaElHeight = this.boundAreaEl.offsetHeight;
     this.boundAreaElWidth = this.boundAreaEl.offsetWidth;
-    this.boundAreaTop = this.radius;
+    this.boundAreaTop = 0;
     this.boundAreaRight = this.boundAreaEl.offsetWidth - this.radius;
     this.boundAreaBottom = this.boundAreaEl.offsetHeight - this.radius;
-    this.boundAreaLeft = this.radius;
-    /* this.computedStyles = window.getComputedStyle(this.element);
-    this.top = MathUtils.limitDecimals(this.parseComputedTop + this.translate.y, this.generalDecimalLimit);
+    this.boundAreaLeft = 0;
+    this.computedStyles = window.getComputedStyle(this.element);
+    /* this.top = MathUtils.limitDecimals(this.parseComputedTop + this.translate.y, this.generalDecimalLimit);
     this.left = MathUtils.limitDecimals(this.parseComputedLeft + this.translate.x, this.generalDecimalLimit);
     this.right = MathUtils.limitDecimals(this.boundAreaWidth - this.left, this.generalDecimalLimit);
     this.bottom = MathUtils.limitDecimals(this.boundAreaHeight - this.top, this.generalDecimalLimit); */
-    this.top = this.boundingClientRect.top;
-    this.left = this.boundingClientRect.left;
-    this.right = this.boundAreaWidth - this.left;
-    this.bottom = this.boundAreaHeight - this.top;
-    this.updateCrossQuadrants();
+    this.top = this.parseComputedTop + this.radius;
+    this.left = this.parseComputedLeft + this.radius;
+    this.right = this.boundAreaElHeight - this.left;
+    this.bottom = this.boundAreaElWidth - this.top;
     // this.updateDirection();
     this.updateBounceData();
     const stateSnapshot = JSON.parse(JSON.stringify(this));
@@ -172,20 +179,28 @@ class Ball {
 
     /* Use objects for semantics */
     this.crossQuadrantTop = {
-      start: MathUtils.limitDecimals(360 - MathUtils.calcTangentAngle(this.boundAreaLeft, this.boundAreaTop)),
-      end: MathUtils.limitDecimals(MathUtils.calcTangentAngle(this.boundAreaRight, this.boundAreaTop))
+      start: MathUtils.limitDecimals(360 - MathUtils.calcTangentAngle(
+        this.left, this.top), this.generalDecimalLimit),
+      end: MathUtils.limitDecimals(MathUtils.calcTangentAngle(
+        this.right, this.top), this.generalDecimalLimit)
     };
     this.crossQuadrantRight = {
-      start: MathUtils.limitDecimals(90 - MathUtils.calcTangentAngle(this.boundAreaTop, this.boundAreaRight)),
-      end: MathUtils.limitDecimals(90 + MathUtils.calcTangentAngle(this.boundAreaBottom, this.boundAreaRight))
+      start: MathUtils.limitDecimals(90 - MathUtils.calcTangentAngle(
+        this.top, this.right), this.generalDecimalLimit),
+      end: MathUtils.limitDecimals(90 + MathUtils.calcTangentAngle(
+        this.bottom, this.right), this.generalDecimalLimit)
     };
     this.crossQuadrantBottom = {
-      start: MathUtils.limitDecimals(180 - MathUtils.calcTangentAngle(this.boundAreaRight, this.boundAreaBottom)),
-      end: MathUtils.limitDecimals(180 + MathUtils.calcTangentAngle(this.boundAreaLeft, this.boundAreaBottom))
+      start: MathUtils.limitDecimals(180 - MathUtils.calcTangentAngle(
+        this.right, this.bottom), this.generalDecimalLimit),
+      end: MathUtils.limitDecimals(180 + MathUtils.calcTangentAngle(
+        this.left, this.bottom), this.generalDecimalLimit)
     };
     this.crossQuadrantLeft = {
-      start: MathUtils.limitDecimals(270 - MathUtils.calcTangentAngle(this.boundAreaBottom, this.boundAreaLeft)),
-      end: MathUtils.limitDecimals(270 + MathUtils.calcTangentAngle(this.boundAreaTop, this.boundAreaLeft))
+      start: MathUtils.limitDecimals(270 - MathUtils.calcTangentAngle(
+        this.bottom, this.left), this.generalDecimalLimit),
+      end: MathUtils.limitDecimals(270 + MathUtils.calcTangentAngle(
+        this.top, this.left), this.generalDecimalLimit)
     };
 
     /* Use array ranges for utility */
@@ -199,13 +214,16 @@ class Ball {
 
   updateBounceData() {
     if (debug) console.log(`Finding next bounce coordinates`);
+    this.updateCrossQuadrants();
+    this.nextBounceWall = null;
+
     /* Bounce direction(left, right, flip) relative to the current direction */
     let relativeBounceDirection = null;
     let adjacentAngle = null;
     let opposingLength = null;
 
     /* Hit top bound */
-    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeTop)) {
+    if (MathUtils.isWithinWrapRange(this.direction, this.crossQuadrantRangeTop, 360, true)) {
       this.nextBounceWall = 'top';
       this.nextBounceCoordinates.y = this.boundAreaTop;
 
@@ -217,19 +235,21 @@ class Ball {
         adjacentAngle = this.direction - 360;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.top);
         this.nextBounceCoordinates.x = this.left - opposingLength;
+        this.directionAfterBounce = 180 + adjacentAngle;
       } else if (movingUpRight) {
         relativeBounceDirection = 'right';
         adjacentAngle = this.direction;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.top);
         this.nextBounceCoordinates.x = this.left + opposingLength;
+        this.directionAfterBounce = 180 - adjacentAngle;
       } else { /* Moving straight up */
-        relativeBounceDirection = 'reverse';
+        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.x = this.left;
       }
     }
 
     /* Hit right bound */
-    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeRight)) {
+    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeRight, true)) {
       this.nextBounceWall = 'right';
       this.nextBounceCoordinates.x = this.boundAreaRight;
       
@@ -241,19 +261,21 @@ class Ball {
         adjacentAngle = 90 - this.direction;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.right);
         this.nextBounceCoordinates.y = this.top - opposingLength;
+        this.directionAfterBounce = 270 + adjacentAngle;
       } else if (movingDownRight) {
         relativeBounceDirection = 'right';
         adjacentAngle = this.direction - 90;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.right);
         this.nextBounceCoordinates.y = this.top + opposingLength;
+        this.directionAfterBounce = 270 - adjacentAngle;
       } else { /* Moving straight right */
-        relativeBounceDirection = 'reverse';
+        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.y = this.top;
       }
     }
 
     /* Hit bottom bound */
-    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeBottom)) {
+    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeBottom, true)) {
       this.nextBounceWall = 'bottom';
       this.nextBounceCoordinates.y = this.boundAreaBottom;
       
@@ -265,19 +287,21 @@ class Ball {
         adjacentAngle = 180 - this.direction;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.bottom);
         this.nextBounceCoordinates.x = this.left + opposingLength;
+        this.directionAfterBounce = 360 - adjacentAngle;
       } else if (movingDownLeft) {
         relativeBounceDirection = 'right';
         adjacentAngle = this.direction - 180;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.bottom);
         this.nextBounceCoordinates.x = this.left - opposingLength;
+        this.directionAfterBounce = adjacentAngle;
       } else { /* Moving straight down */
-        relativeBounceDirection = 'reverse';
+        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.x = this.left;
       }
     }
 
     /* Hit left bound */
-    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeLeft)) {
+    if (MathUtils.isWithinRange(this.direction, this.crossQuadrantRangeLeft, true)) {
       this.nextBounceWall = 'left';
       this.nextBounceCoordinates.x = this.boundAreaLeft;
       
@@ -289,25 +313,27 @@ class Ball {
         adjacentAngle = 270 - this.direction;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.left);
         this.nextBounceCoordinates.y = this.top + opposingLength;
+        this.directionAfterBounce = 90 + adjacentAngle;
       } else if (movingUpLeft) {
         relativeBounceDirection = 'right';
         adjacentAngle = this.direction - 270;
         opposingLength = MathUtils.calcRightTriangleOppositeLength(adjacentAngle, this.left);
         this.nextBounceCoordinates.y = this.top - opposingLength;
+        this.directionAfterBounce = 90 - adjacentAngle;
       } else { /* Moving straight left */
-        relativeBounceDirection = 'reverse';
+        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.y = this.top;
       }
     }
 
     // Find direction after bounce
-    const opposingAngle = 180 - adjacentAngle;
+    /* const opposingAngle = adjacentAngle ? 90 - adjacentAngle : 0;
     if (relativeBounceDirection === 'left')
       this.directionAfterBounce = this.direction - opposingAngle;
     if (relativeBounceDirection === 'right')
       this.directionAfterBounce = this.direction + opposingAngle;
     if (relativeBounceDirection === 'flip')
-      this.directionAfterBounce = this.direction + 180;
+      this.directionAfterBounce = this.direction + 180; */
 
     // Ensure that the 360 deg angle system is maintained by wrapping values
     // If direction is over 360 then reduce it by 360
@@ -317,8 +343,10 @@ class Ball {
       this.directionAfterBounce += 360;
 
     /* TODO: Catch corners */
-    if (relativeBounceDirection)
-      if (debug) console.log(`Hit a corner!`);
+    if (relativeBounceDirection) {
+      if (debug) console.log(`Going to hit a corner! Lets get CRAZY!!!`);
+      this.directionAfterBounce = MathUtils.getRandomInt(360);
+    }
 
     this.nextBounceCoordinates.x = MathUtils.limitDecimals(this.nextBounceCoordinates.x, this.generalDecimalLimit);
     this.nextBounceCoordinates.y = MathUtils.limitDecimals(this.nextBounceCoordinates.y, this.generalDecimalLimit);
@@ -327,6 +355,11 @@ class Ball {
     this.distanceToNextWall = MathUtils.limitDecimals(
       MathUtils.calcHypotenuseBySides(this[this.nextBounceWall], opposingLength), this.generalDecimalLimit);
     this.secondsToNextWall = MathUtils.limitDecimals(this.distanceToNextWall / this.speed, this.generalDecimalLimit);
+
+    /* if (debug) console.log(`Adjacent angle: ${adjacentAngle} Opposing angle: ${opposingAngle} 
+      Opposing length: ${opposingLength}`); */
+
+    if (debug) console.log(`Adjacent angle: ${adjacentAngle} Opposing length: ${opposingLength}`);
 
     if (debug) console.log(`Next bounce is on ${this.nextBounceWall} wall 
       at coordinates [${this.nextBounceCoordinates.x}, ${this.nextBounceCoordinates.y}]`);
@@ -337,16 +370,17 @@ class Ball {
     this.moveCount++;
     this.element.style.transitionTimingFunction = 'linear';
     this.element.style.transitionDuration = `${this.secondsToNextWall}s`;
-    this.element.style.transform = `translate(${this.translate.x}px, ${this.translate.y}px)`;
-    /* this.element.style.left = this.left - this.radius;
-    this.element.style.top = this.top - this.radius; */
+    // this.element.style.transform = `translate(${this.translate.x}px, ${this.translate.y}px)`;
+    this.element.style.left = this.nextBounceCoordinates.x - this.radius + 'px';
+    this.element.style.top = this.nextBounceCoordinates.y - this.radius + 'px';
     const msTravelTime = this.secondsToNextWall * 1000;
-    if (debug) console.log(`Setting up ball to hit coordinates [${this.nextBounceCoordinates}] 
-      with left and top values [${this.translate.x},${this.translate.y}] in ${this.secondsToNextWall} seconds`);
+    if (debug) console.log(`Moving ball to coordinates [${this.nextBounceCoordinates.x},
+      ${this.nextBounceCoordinates.y}] in ${this.secondsToNextWall} seconds`);
 
     if (this.moveCount < 10) {
       this.nextMoveTimer = setTimeout(() => {
         if (debug) console.log(`Arrived at ${this.nextBounceWall} wall`);
+        this.direction = this.directionAfterBounce;
         this.updateState();
         this.moveToWall();
         // this.updateBallPosition();
@@ -374,6 +408,6 @@ const boundAreaEl = document.querySelector('#ball-bounding-area');
 boundAreaEl.addEventListener('click', addBall);
 
 function addBall() {
-  const ball = new Ball(50, 50, 181, 400);
+  const ball = new Ball(50, 50, 50, 170, 400);
   ball.enterDOM(boundAreaEl);
 }
