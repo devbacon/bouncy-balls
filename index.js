@@ -55,14 +55,13 @@ class Ball {
     
     /* Bound properties */
     this.boundAreaEl = null;
-    this.boundAreaStyles = null;
     this.boundAreaHeight = null;
     this.boundAreaWidth = null;
 
     /* Ball properties */
     this.element = element;
     this.styles = null;
-    this.circumference = null;
+    this.diameter = null;
     this.radius = null;
     this.direction = direction;
     this.speed = speed;
@@ -89,17 +88,42 @@ class Ball {
   }
 
   enterDOM(container) {
-    if (debug) console.log(`Ball element entering DOM in container`, this.element, container);
+    if (debug) console.log(`Ball element entering DOM in containing element`, this.element, container);
     container.appendChild(this.element);
     this.boundAreaEl = container;
     this.updateAllProps();
+    this.checkStartCoords();
     this.moveToWall();
+  }
+
+  /* Make sure that start XY coordinates are in bounds */
+  checkStartCoords() {
+    if (debug) console.log(`Ensuring that starting coordinated are in bounds`, this.element, container);
+    const xInBounds = MathUtils.isWithinRange(this.startX, [this.boundAreaLeft, this.boundAreaRight]);
+    const yInBounds = MathUtils.isWithinRange(this.startY, [this.boundAreaTop, this.boundAreaBottom]);
+
+    if (!xInBounds || !yInBounds)
+      this.leaveDOM();
+    else
+      if (debug) console.log(`Starting coordinate are indeed within bounds`);
   }
 
   updateAllProps() {
     if (debug) console.log(`Updating all object properties`);
-    this.updateBoundProps();
-    this.updateBallProps();
+    /* this.updateBoundProps();
+    this.updateBallProps(); */
+    this.diameter = this.element.offsetWidth;
+    this.radius = this.diameter / 2;
+    this.boundAreaHeight = this.boundAreaEl.offsetHeight - this.diameter;
+    this.boundAreaWidth = this.boundAreaEl.offsetWidth - this.diameter;
+    this.boundAreaTop = this.radius;
+    this.boundAreaRight = this.boundAreaEl.offsetWidth - this.radius;
+    this.boundAreaBottom = this.boundAreaEl.offsetHeight - this.radius;
+    this.boundAreaLeft = this.radius;
+    this.top = MathUtils.limitDecimals(this.top + this.moveY);
+    this.left = MathUtils.limitDecimals(this.left + this.moveX);
+    this.right = MathUtils.limitDecimals(this.boundAreaWidth - this.left);
+    this.bottom = MathUtils.limitDecimals(this.boundAreaHeight - this.top);
     console.log(`Checking on element`, this.element);
     const stateSnapshot = JSON.parse(JSON.stringify(this));
     if (debug) console.log(`Properties update completed`, stateSnapshot);
@@ -107,7 +131,6 @@ class Ball {
 
   updateBoundProps() {
     if (debug) console.log(`Updating boundary properties`);
-    this.boundAreaStyles = window.getComputedStyle(this.boundAreaEl);
     this.boundAreaHeight = this.boundAreaEl.offsetHeight;
     this.boundAreaWidth = this.boundAreaEl.offsetWidth;
   }
@@ -115,8 +138,8 @@ class Ball {
   updateBallProps() {
     if (debug) console.log(`Updating ball properties`);
     this.styles = window.getComputedStyle(this.element);
-    this.circumference = this.element.offsetWidth;
-    this.radius = this.circumference / 2;
+    this.diameter = this.element.offsetWidth;
+    this.radius = this.diameter / 2;
     this.top = MathUtils.limitDecimals(this.top + this.moveY);
     this.left = MathUtils.limitDecimals(this.left + this.moveX);
     this.right = MathUtils.limitDecimals(this.boundAreaWidth - this.left);
@@ -225,7 +248,7 @@ class Ball {
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.left - this.radius + collisionTangentLength);
         this.nextWallCollisionCoords = [nextWallCalcCoord, this.boundAreaHeight];
-        this.moveX = collisionTangentLength - this.radius;
+        this.moveX = collisionTangentLength;
       }
 
       if (leftBottom) {
@@ -233,7 +256,7 @@ class Ball {
         collisionTangentLength = MathUtils.calcRightTriangleOppositeLength(collisionAngle, this.bottom, null);
         nextWallCalcCoord = MathUtils.limitDecimals(this.left - this.radius - collisionTangentLength);
         this.nextWallCollisionCoords = [nextWallCalcCoord, this.boundAreaHeight];
-        this.moveX = -collisionTangentLength + this.radius;
+        this.moveX = -collisionTangentLength;
       }
 
       this.moveY = this.bottom - this.radius;
@@ -382,7 +405,7 @@ class Ball {
   }
 
   leaveDOM(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     this.boundAreaEl.removeChild(this.element);
   }
 }
@@ -392,6 +415,6 @@ const boundAreaEl = document.querySelector('#ball-bounding-area');
 boundAreaEl.addEventListener('click', addBall);
 
 function addBall() {
-  const ball = new Ball(50, 50, 300, 400);
+  const ball = new Ball(50, 50, 181, 400);
   ball.enterDOM(boundAreaEl);
 }
