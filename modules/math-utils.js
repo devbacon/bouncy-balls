@@ -65,6 +65,9 @@ const MathUtils = {
   },
 
   /* HELPER METHODS */
+  getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  },
 
   /* Validation */
   isValidTriangleAngle(angle) {
@@ -81,12 +84,29 @@ const MathUtils = {
     if (typeof number != 'number' || !Array.isArray(range) || range.length !== 2) return false;
     const min = range[0];
     const max = range[1];
-    if (min > max) return false;
-    
+
+    if (typeof min != 'number' || typeof max != 'number' || min > max) return false;
     if (inclusive)
       return number >= min && number <= max;
     else
       return number > min && number < max;
+  },
+
+  isWithinWrapRange(number, range, wrapLimit, inclusive) {
+    if (typeof number != 'number' || typeof wrapLimit != 'number' || 
+      !Array.isArray(range) || range.length !== 2) return false;
+    const min = range[0];
+    const max = range[1];
+
+    if (typeof min != 'number' || typeof max != 'number') return false;
+    if (min > max && min > wrapLimit) {
+      if (inclusive)
+        return (number >= min && number <= wrapLimit) || (number >= 0 && number <= max);
+      else
+        return (number > min && number < wrapLimit) || (number > 0 && number < max);
+    } else {
+      return false;
+    }
   },
 
   /* Conversions */
