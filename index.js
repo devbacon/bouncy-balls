@@ -1,12 +1,6 @@
 /* Take care with the order of arguments in MathUtils methods */
 import MathUtils from './modules/math-utils.js';
 
-/* 
-  Development Notes:
-    - Consider front loading some of the computation on page load
-    - Control CSS animations and transitions with JS
-*/
-
 const debug = true;
 
 /* TODO: Move colors to CSS */
@@ -100,10 +94,6 @@ class Ball {
       facing angle ${direction} with speed of ${speed}`, this);
   }
 
-  /* get boundingClientRect() {
-    return this.element.getBoundingClientRect();
-  } */
-
   get parseComputedTop() {
     return parseInt(this.computedStyles.top);
   }
@@ -153,15 +143,10 @@ class Ball {
     this.boundAreaBottom = this.boundAreaEl.offsetHeight - this.radius;
     this.boundAreaLeft = this.radius;
     this.computedStyles = window.getComputedStyle(this.element);
-    /* this.top = MathUtils.limitDecimals(this.parseComputedTop + this.translate.y, this.generalDecimalLimit);
-    this.left = MathUtils.limitDecimals(this.parseComputedLeft + this.translate.x, this.generalDecimalLimit);
-    this.right = MathUtils.limitDecimals(this.boundAreaWidth - this.left, this.generalDecimalLimit);
-    this.bottom = MathUtils.limitDecimals(this.boundAreaHeight - this.top, this.generalDecimalLimit); */
     this.top = this.parseComputedTop + this.radius;
     this.left = this.parseComputedLeft + this.radius;
     this.right = this.boundAreaElHeight - this.left;
     this.bottom = this.boundAreaElWidth - this.top;
-    // this.updateDirection();
     this.updateBounceData();
     const stateSnapshot = JSON.parse(JSON.stringify(this));
     if (debug) console.log(`Properties update completed`, stateSnapshot, this.element);
@@ -357,7 +342,6 @@ class Ball {
     this.moveCount++;
     this.element.style.transitionTimingFunction = 'linear';
     this.element.style.transitionDuration = `${this.secondsToNextWall}s`;
-    // this.element.style.transform = `translate(${this.translate.x}px, ${this.translate.y}px)`;
     this.element.style.left = this.nextBounceCoordinates.x - this.radius + 'px';
     this.element.style.top = this.nextBounceCoordinates.y - this.radius + 'px';
     const msTravelTime = this.secondsToNextWall * 1000;
@@ -370,7 +354,6 @@ class Ball {
         this.direction = this.directionAfterBounce;
         this.updateState();
         this.moveToWall();
-        // this.updateBallPosition();
       }, msTravelTime);
     }
   }
