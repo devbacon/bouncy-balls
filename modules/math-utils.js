@@ -1,5 +1,10 @@
 /* Custom math utility short cuts */
 const MathUtils = {
+  findRemainingTriangleAngle(angle1, angle2) {
+    if (angle1 + angle2 > 180) return null;
+    return 180 - angle1 - angle2;
+  },
+
   calcHypotenuseBySides(length1, length2) {
     return Math.sqrt(Math.pow(length1, 2) + Math.pow(length2, 2));
   },
@@ -60,6 +65,13 @@ const MathUtils = {
   },
 
   /* HELPER METHODS */
+  getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max + 1));
+  },
+
+  getRandomIntInRange(min, max) {
+    return Math.floor(Math.random() * Math.floor(max - min + 1) + min);
+  },
 
   /* Validation */
   isValidTriangleAngle(angle) {
@@ -72,6 +84,35 @@ const MathUtils = {
     return true;
   },
 
+  isWithinRange(number, range, inclusive) {
+    if (typeof number != 'number' || !Array.isArray(range) || range.length !== 2) return false;
+    const min = range[0];
+    const max = range[1];
+
+    if (typeof min != 'number' || typeof max != 'number' || min > max) return false;
+    if (inclusive)
+      return number >= min && number <= max;
+    else
+      return number > min && number < max;
+  },
+
+  isWithinWrapRange(number, range, wrapLimit, inclusive) {
+    if (typeof number != 'number' || typeof wrapLimit != 'number' || 
+      !Array.isArray(range) || range.length !== 2) return false;
+    const min = range[0];
+    const max = range[1];
+
+    if (typeof min != 'number' || typeof max != 'number') return false;
+    if (min > max && min < wrapLimit) {
+      if (inclusive)
+        return (number >= min && number <= wrapLimit) || (number >= 0 && number <= max);
+      else
+        return (number > min && number < wrapLimit) || (number > 0 && number < max);
+    } else {
+      return false;
+    }
+  },
+
   /* Conversions */
   radiansToDegrees(radians) {
     return radians * (180 / Math.PI);
@@ -79,7 +120,13 @@ const MathUtils = {
 
   degreesToRadians(degrees) {
     return degrees * Math.PI / 180
-  }
+  },
+
+  limitDecimals(number, decimals) {
+    if (typeof number != 'number' || typeof decimals != 'number') return false;
+    const limit = Math.pow(10, decimals);
+    return Math.round((number + Number.EPSILON) * limit) / limit;
+  },
 };
 
 export default MathUtils;
