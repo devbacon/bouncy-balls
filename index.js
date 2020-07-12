@@ -53,15 +53,6 @@ class Ball {
     element.style.top = `${startY - size / 2}px`;
     element.classList.add('ball');
     
-    /* Bound properties */
-    this.boundAreaEl = null;
-    this.boundAreaElHeight = 0;
-    this.boundAreaElWidth = 0;
-    /* Inner bound limits that factor radius of ball */
-    this.boundAreaTop = 0;
-    this.boundAreaRight = 0;
-    this.boundAreaBottom = 0;
-    this.boundAreaLeft = 0;
     /* Ball properties */
     this.element = element;
     this.computedStyles = {};
@@ -69,6 +60,15 @@ class Ball {
     this.radius = size / 2;
     this.direction = direction;
     this.speed = speed;
+    /* Bound properties */
+    this.boundAreaEl = null;
+    this.boundAreaElHeight = 0;
+    this.boundAreaElWidth = 0;
+    /* Inner bound limits that factor radius of ball */
+    this.boundAreaTop = this.radius;
+    this.boundAreaRight = 0;
+    this.boundAreaBottom = 0;
+    this.boundAreaLeft = this.radius;
     /* Coordinate plane starts at top left of bound area */
     this.startX = startX;
     this.startY = startY;
@@ -146,14 +146,12 @@ class Ball {
 
   updateState() {
     if (debug) console.log(`Updating all object properties`);
-    /* this.diameter = this.element.offsetWidth;
-    this.radius = this.diameter / 2; */
     this.boundAreaElHeight = this.boundAreaEl.offsetHeight;
     this.boundAreaElWidth = this.boundAreaEl.offsetWidth;
-    this.boundAreaTop = 0;
+    this.boundAreaTop = this.radius;
     this.boundAreaRight = this.boundAreaEl.offsetWidth - this.radius;
     this.boundAreaBottom = this.boundAreaEl.offsetHeight - this.radius;
-    this.boundAreaLeft = 0;
+    this.boundAreaLeft = this.radius;
     this.computedStyles = window.getComputedStyle(this.element);
     /* this.top = MathUtils.limitDecimals(this.parseComputedTop + this.translate.y, this.generalDecimalLimit);
     this.left = MathUtils.limitDecimals(this.parseComputedLeft + this.translate.x, this.generalDecimalLimit);
@@ -243,7 +241,6 @@ class Ball {
         this.nextBounceCoordinates.x = this.left + opposingLength;
         this.directionAfterBounce = 180 - adjacentAngle;
       } else { /* Moving straight up */
-        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.x = this.left;
       }
     }
@@ -269,7 +266,6 @@ class Ball {
         this.nextBounceCoordinates.y = this.top + opposingLength;
         this.directionAfterBounce = 270 - adjacentAngle;
       } else { /* Moving straight right */
-        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.y = this.top;
       }
     }
@@ -295,7 +291,6 @@ class Ball {
         this.nextBounceCoordinates.x = this.left - opposingLength;
         this.directionAfterBounce = adjacentAngle;
       } else { /* Moving straight down */
-        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.x = this.left;
       }
     }
@@ -321,19 +316,18 @@ class Ball {
         this.nextBounceCoordinates.y = this.top - opposingLength;
         this.directionAfterBounce = 90 - adjacentAngle;
       } else { /* Moving straight left */
-        relativeBounceDirection = 'flip';
         this.nextBounceCoordinates.y = this.top;
       }
     }
 
     // Find direction after bounce
-    /* const opposingAngle = adjacentAngle ? 90 - adjacentAngle : 0;
+    const opposingAngle = adjacentAngle ? 90 - adjacentAngle : 0;
     if (relativeBounceDirection === 'left')
-      this.directionAfterBounce = this.direction - opposingAngle;
-    if (relativeBounceDirection === 'right')
-      this.directionAfterBounce = this.direction + opposingAngle;
-    if (relativeBounceDirection === 'flip')
-      this.directionAfterBounce = this.direction + 180; */
+      this.directionAfterBounce = this.direction - (opposingAngle * 2);
+    else if (relativeBounceDirection === 'right')
+      this.directionAfterBounce = this.direction + (opposingAngle * 2);
+    else /* This should catch corners too */
+      this.directionAfterBounce = this.direction + 180;
 
     // Ensure that the 360 deg angle system is maintained by wrapping values
     // If direction is over 360 then reduce it by 360
@@ -342,11 +336,8 @@ class Ball {
     if (this.directionAfterBounce < 0)
       this.directionAfterBounce += 360;
 
-    /* TODO: Catch corners */
-    if (relativeBounceDirection) {
-      if (debug) console.log(`Going to hit a corner! Lets get CRAZY!!!`);
-      this.directionAfterBounce = MathUtils.getRandomInt(360);
-    }
+    if (!relativeBounceDirection)
+      if (debug) console.log(`Going to hit a corner`);
 
     this.nextBounceCoordinates.x = MathUtils.limitDecimals(this.nextBounceCoordinates.x, this.generalDecimalLimit);
     this.nextBounceCoordinates.y = MathUtils.limitDecimals(this.nextBounceCoordinates.y, this.generalDecimalLimit);
@@ -356,11 +347,7 @@ class Ball {
       MathUtils.calcHypotenuseBySides(this[this.nextBounceWall], opposingLength), this.generalDecimalLimit);
     this.secondsToNextWall = MathUtils.limitDecimals(this.distanceToNextWall / this.speed, this.generalDecimalLimit);
 
-    /* if (debug) console.log(`Adjacent angle: ${adjacentAngle} Opposing angle: ${opposingAngle} 
-      Opposing length: ${opposingLength}`); */
-
     if (debug) console.log(`Adjacent angle: ${adjacentAngle} Opposing length: ${opposingLength}`);
-
     if (debug) console.log(`Next bounce is on ${this.nextBounceWall} wall 
       at coordinates [${this.nextBounceCoordinates.x}, ${this.nextBounceCoordinates.y}]`);
   }
@@ -387,16 +374,6 @@ class Ball {
       }, msTravelTime);
     }
   }
-
-  /* updateBallElementLocation() {
-    if (debug) console.log(`Ball styles before update are top:${this.element.style.top} left:${this.element.style.left}`);
-    // this.element.style.transitionDuration = `0s`;
-    const boundingRect = this.element.getBoundingClientRect();
-    this.element.style.top = this.element.getBoundingClientRect() + 'px';
-    this.element.style.left = this.left - this.radius + 'px';
-    // this.element.style.transform = `translate(0px, 0px)`;
-    if (debug) console.log(`Updating ball styles to top:${this.element.style.top} left:${this.element.style.left}`);
-  } */
 
   stopMoving() {
 
