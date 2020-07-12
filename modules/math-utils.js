@@ -69,7 +69,7 @@ const MathUtils = {
     return Math.floor(Math.random() * Math.floor(max + 1));
   },
 
-  getRandomInRange(min, max) {
+  getRandomIntInRange(min, max) {
     return Math.floor(Math.random() * Math.floor(max - min + 1) + min);
   },
 
