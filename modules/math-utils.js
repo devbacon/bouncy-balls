@@ -66,7 +66,11 @@ const MathUtils = {
 
   /* HELPER METHODS */
   getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
+    return Math.floor(Math.random() * Math.floor(max + 1));
+  },
+
+  getRandomInRange(min, max) {
+    return Math.floor(Math.random() * Math.floor(max - min + 1) + min);
   },
 
   /* Validation */
