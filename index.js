@@ -2,7 +2,7 @@
 import MathUtils from './modules/math-utils.js';
 
 /* TODO: Find a way to differentiate between balls in log */
-const debug = true;
+const debug = false;
 
 /* TODO: Move colors to CSS */
 const colorHex = {
@@ -351,14 +351,12 @@ class Ball {
     if (debug) console.log(`Moving ball to coordinates [${this.nextBounceCoordinates.x},
       ${this.nextBounceCoordinates.y}] in ${this.secondsToNextWall} seconds`);
 
-    if (this.moveCount < 10) {
-      this.nextMoveTimer = setTimeout(() => {
-        if (debug) console.log(`Arrived at ${this.nextBounceWall} wall`);
-        this.direction = this.directionAfterBounce;
-        this.updateState();
-        this.moveToWall();
-      }, msTravelTime);
-    }
+    this.nextMoveTimer = setTimeout(() => {
+      if (debug) console.log(`Arrived at ${this.nextBounceWall} wall`);
+      this.direction = this.directionAfterBounce;
+      this.updateState();
+      this.moveToWall();
+    }, msTravelTime);
   }
 
   stopMoving() {
