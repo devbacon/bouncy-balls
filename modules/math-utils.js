@@ -99,7 +99,7 @@ const MathUtils = {
     const max = range[1];
 
     if (typeof min != 'number' || typeof max != 'number') return false;
-    if (min > max && min > wrapLimit) {
+    if (min > max && min < wrapLimit) {
       if (inclusive)
         return (number >= min && number <= wrapLimit) || (number >= 0 && number <= max);
       else
