@@ -365,9 +365,23 @@ class Ball {
 
 /* Set click listener bounding area to spawn in bouncy */
 const boundAreaEl = document.querySelector('#ball-bounding-area');
-boundAreaEl.addEventListener('click', addBall);
+boundAreaEl.addEventListener('click', addRandomBall);
 
 function addBall() {
   const ball = new Ball(50, 50, 50, 170, 400);
+  ball.enterDOM(boundAreaEl);
+}
+
+/* Find better way to do randomization later */
+function addRandomBall() {
+  const boundWidth = boundAreaEl.offsetWidth;
+  const boundHeight = boundAreaEl.offsetHeight;
+  const diameter = MathUtils.getRandomIntInRange(10, 50);
+  const radius = diameter / 2;
+  const startX = MathUtils.getRandomIntInRange(radius, boundWidth - radius);
+  const startY = MathUtils.getRandomIntInRange(radius, boundHeight - radius);
+  const direction = MathUtils.getRandomInt(360);
+  const speed = MathUtils.getRandomIntInRange(100, 600);
+  const ball = new Ball(startX, startY, diameter, direction, speed);
   ball.enterDOM(boundAreaEl);
 }
