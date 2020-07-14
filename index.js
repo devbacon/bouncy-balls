@@ -379,7 +379,7 @@ function addBall() {
 function addRandomBall() {
   const boundWidth = boundAreaEl.offsetWidth;
   const boundHeight = boundAreaEl.offsetHeight;
-  const diameter = MathUtils.getRandomIntInRange(10, 50);
+  const diameter = MathUtils.getRandomIntInRange(30, 50);
   const radius = diameter / 2;
   const startX = MathUtils.getRandomIntInRange(radius, boundWidth - radius);
   const startY = MathUtils.getRandomIntInRange(radius, boundHeight - radius);
