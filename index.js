@@ -32,6 +32,8 @@ const relativeAngleReferences = {
   topEnd: 360,
 };
 
+const boundingShadowWidth = 7;
+
 class Ball {
   constructor(startX, startY, size, direction, speed) {
     /* Randomize colors */
@@ -141,10 +143,10 @@ class Ball {
     if (debug) console.log(`Updating all object properties`);
     this.boundAreaElHeight = this.boundAreaEl.offsetHeight;
     this.boundAreaElWidth = this.boundAreaEl.offsetWidth;
-    this.boundAreaTop = this.radius;
-    this.boundAreaRight = this.boundAreaEl.offsetWidth - this.radius;
-    this.boundAreaBottom = this.boundAreaEl.offsetHeight - this.radius;
-    this.boundAreaLeft = this.radius;
+    this.boundAreaTop = this.radius + boundingShadowWidth;
+    this.boundAreaRight = this.boundAreaEl.offsetWidth - this.radius - boundingShadowWidth;
+    this.boundAreaBottom = this.boundAreaEl.offsetHeight - this.radius - boundingShadowWidth;
+    this.boundAreaLeft = this.radius + boundingShadowWidth;
     this.computedStyles = window.getComputedStyle(this.element);
     this.top = this.parseComputedTop + this.radius;
     this.left = this.parseComputedLeft + this.radius;
