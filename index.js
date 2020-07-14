@@ -32,7 +32,7 @@ const relativeAngleReferences = {
   topEnd: 360,
 };
 
-const boundingShadowWidth = 7;
+const boundingShadowWidth = 12;
 
 class Ball {
   constructor(startX, startY, size, direction, speed) {
