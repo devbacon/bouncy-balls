@@ -6,11 +6,16 @@
 }
 
 body {
-  background: #888;
+  background: #333;
 }
 
 #ball-bounding-area {
   background: #333;
+  border-radius: 3px;
+  box-shadow: inset 0px 0px 7px 10px #444, /* Inner raised rim */
+    inset 0px 0px 5px 17px #2A2A2A, /* Inner shadow */
+    0px 0px 5px 5px #444, /* Outer raised rim */
+    0px 0px 7px 10px #2A2A2A; /* Outer shadow */
   height: 500px;
   margin: 50px auto;
   position: relative;
