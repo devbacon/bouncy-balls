@@ -45,7 +45,7 @@ class Ball {
     /* Generate ball DOM element with selected colors */
     const element = document.createElement('div');
     element.addEventListener('click', this.leaveDOM.bind(this));
-    element.style.background = `linear-gradient(35deg, ${this.primaryColor}, ${this.secondaryColor})`;
+    // element.style.background = `linear-gradient(35deg, ${this.primaryColor}, ${this.secondaryColor})`;
     element.style.width = size + 'px';
     element.style.height = size + 'px';
     element.style.left = `${startX - size / 2}px`;
