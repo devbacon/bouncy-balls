@@ -24,6 +24,9 @@ body {
 
 .ball {
   border-radius: 50%;
+  box-shadow: inset 2px 2px 8px 0px #0003, /* Inner top left shadow */
+    inset -2px -2px 8px 0px #0003, /* Inner bottom right shadow */
+    0px 0px 1px 1px #0003; /* Outer shadow */
   height: 50px;
   left: 0;
   position: absolute;
